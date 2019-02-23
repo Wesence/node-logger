@@ -1,17 +1,17 @@
 const uuid = require('uuid');
 const formats = require('./formats');
 
-function configureMiddleware(Logger) {
+function configureMiddleware(logger, { short = false } = {}) {
   return async (ctx, next) => {
     const start = new Date();
     const id = uuid();
 
-    Logger.info(formats.request(id, ctx));
+    logger.info(formats.request({ id, ctx }, { short }));
 
     try {
       await next();
     } catch (err) {
-      Logger.error(formats.error(id, ctx, err));
+      logger.error(formats.error({ id, ctx, err }, { short }));
       throw err;
     }
 
@@ -26,9 +26,7 @@ function configureMiddleware(Logger) {
       ctx.res.removeListener('finish', done);
       ctx.res.removeListener('close', done);
 
-      Logger.info(
-        formats.response(id, start, ctx, counter ? counter.length : length),
-      );
+      logger.info(formats.response({ id, start, ctx, length: counter ? counter.length : length }, { short }));
     }
 
     ctx.res.once('finish', done);

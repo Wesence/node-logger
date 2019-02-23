@@ -3,10 +3,7 @@ const { omitBy } = require('lodash');
 
 function delta(start) {
   const difference = new Date() - start;
-  const string =
-    difference < 10000
-      ? `${difference}ms`
-      : `${Math.round(difference / 1000)}s`;
+  const string = difference < 10000 ? `${difference}ms` : `${Math.round(difference / 1000)}s`;
   return numeral(string);
 }
 
@@ -27,8 +24,8 @@ function filter(data) {
   });
 }
 
-function response(id, start, ctx, length) {
-  return {
+function response({ id, start, ctx, length } = {}, { short = false } = {}) {
+  const log = {
     id,
     type: 'response',
     status: ctx.status || 404,
@@ -39,10 +36,16 @@ function response(id, start, ctx, length) {
     time: delta(start),
     length,
   };
+
+  if (short) {
+    return `--> ${log.method} ${log.path} ${log.status}\n${log.length} ${log.time}`;
+  }
+
+  return log;
 }
 
-function request(id, ctx) {
-  return {
+function request({ id, ctx } = {}, { short = false } = {}) {
+  const log = {
     id,
     type: 'request',
     method: ctx.method,
@@ -51,10 +54,16 @@ function request(id, ctx) {
     data: filter(ctx.request.body),
     ip: ctx.ip,
   };
+
+  if (short) {
+    return `<-- ${log.method} ${log.path}\n${log.query}\n${log.data}`.trim();
+  }
+
+  return log;
 }
 
-function error(id, ctx, err) {
-  return {
+function error({ id, ctx, err } = {}, { short = false } = {}) {
+  const log = {
     id,
     type: 'error',
     method: ctx.method,
@@ -65,6 +74,12 @@ function error(id, ctx, err) {
     error: err,
     stack: err.stack,
   };
+
+  if (short) {
+    return `--> ${log.method} ${log.path} ${log.error.name}\n${log.stack}`.trim();
+  }
+
+  return log;
 }
 
 module.exports = {

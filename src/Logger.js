@@ -17,19 +17,12 @@ const customFormat = printf((msg) => {
   return result;
 });
 
-let Logger;
-
 function configure({ label }) {
   const options = {
     level: 'silly',
     handleExceptions: true,
     json: false,
-    format: combine(
-      formatLabel({ label }),
-      colorize({ all: true }),
-      errors({ stack: true }),
-      customFormat,
-    ),
+    format: combine(formatLabel({ label }), colorize({ all: true }), errors({ stack: true }), customFormat),
     transports: [new transports.Console()],
   };
 
