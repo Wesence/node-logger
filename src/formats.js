@@ -11,6 +11,16 @@ function delta(start) {
 }
 
 function filter(data) {
+  if (typeof data === 'string') {
+    try {
+      return omitBy(JSON.parse(data), (value, key) => {
+        const regExp = /phone|password|key|mobile/gi;
+        return regExp.test(String(key));
+      });
+    } catch (e) {
+      return data;
+    }
+  }
   return omitBy(data, (value, key) => {
     const regExp = /phone|password|key|mobile/gi;
     return regExp.test(String(key));
