@@ -4,7 +4,7 @@ const { omitBy } = require('lodash');
 function delta(start) {
   const difference = new Date() - start;
   const string = difference < 10000 ? `${difference}ms` : `${Math.round(difference / 1000)}s`;
-  return numeral(string);
+  return numeral(string).format('0,0');
 }
 
 function filter(data) {
@@ -56,7 +56,7 @@ function request({ id, ctx } = {}, { short = false } = {}) {
   };
 
   if (short) {
-    return `<-- ${log.method} ${log.path}\n${log.query}\n${log.data}`.trim();
+    return `<-- ${log.method} ${log.path}\n${JSON.stringify(log.query)}\n${JSON.stringify(log.data)}`.trim();
   }
 
   return log;
