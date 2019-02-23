@@ -4,7 +4,11 @@ const { combine, label: formatLabel, printf, colorize, errors } = format;
 
 const customFormat = printf((msg) => {
   const timestamp = new Date().toISOString();
-  let result = `[${msg.label}] [${timestamp}] [${msg.level}]: ${msg.message}`;
+  let result = `[${timestamp}] [${msg.level}]: ${msg.message}`;
+
+  if (msg.label) {
+    result = `[${msg.label}] ${result}`;
+  }
 
   if (msg.stack) {
     result = `${result}\n${msg.stack}`;
