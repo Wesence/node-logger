@@ -1,13 +1,16 @@
 const { createLogger, format, transports } = require('winston');
-const moment = require('moment');
 
-const { combine, label: formatLabel, printf, colorize } = format;
+const { combine, label: formatLabel, printf, colorize, errors } = format;
 
 const customFormat = printf((msg) => {
-  const timestasmp = moment(new Date()).format('YYYY-MM-DD HH:mm:ss.SSS');
-  return `[${msg.label}] [${timestasmp}] [${msg.level.toUpperCase()}]: ${
-    msg.message
-  }`;
+  const timestamp = new Date().toISOString();
+  let result = `[${msg.label}] [${timestamp}] [${msg.level}]: ${msg.message}`;
+
+  if (msg.stack) {
+    result = `${result}\n${msg.stack}`;
+  }
+
+  return result;
 });
 
 let Logger;
@@ -19,21 +22,17 @@ function configure({ label }) {
     json: false,
     format: combine(
       formatLabel({ label }),
-      colorize({
-        message: true,
-      }),
+      colorize({ all: true }),
+      errors({ stack: true }),
       customFormat,
     ),
-    transports: [],
+    transports: [new transports.Console()],
   };
 
-  options.transports.push(new transports.Console());
+  global.Logger = createLogger(options);
+  Object.freeze(global.Logger);
 
-  options.json = false;
-  Logger = createLogger(options);
-  return {
-    Logger,
-  };
+  return global.Logger;
 }
 
-module.exports = configure({ label: 'TEST' });
+module.exports = configure;
